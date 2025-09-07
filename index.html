@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödev PDF Yazdırma Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.6s ease;
+        }
+
+        .subject-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subject-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .pdf-list {
+            list-style: none;
+        }
+
+        .pdf-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pdf-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .pdf-name {
+            color: #495057;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .pdf-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .btn-print {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #38a169;
+            transform: scale(1.05);
+        }
+
+        .print-all-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: slideUp 0.8s ease;
+        }
+
+        .print-all-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .btn-print-all {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 30px;
+            font-size: 16px;
+        }
+
+        .btn-print-all:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .pdf-viewer-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .pdf-viewer-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            margin: 2% auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .close-viewer {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: #333;
+            cursor: pointer;
+            z-index: 1001;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-viewer:hover {
+            background: #f0f0f0;
+        }
+
+        #pdfFrame {
+            width: 100%;
+            height: calc(100% - 20px);
+            border: none;
+            border-radius: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .pdf-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .pdf-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 50px;
+        }
+
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Ödev PDF Yazdırma Sistemi</h1>
+            <p>Türkçe, Biyoloji ve Kavram Haritası ödevlerinizi kolayca görüntüleyin ve yazdırın</p>
+        </div>
+
+        <div class="subjects-grid">
+            <!-- Türkçe Kartı -->
+            <div class="subject-card">
+                <h2>
+                    <span class="subject-icon">T</span>
+                    Türkçe Ödevleri
+                </h2>
+                <ul class="pdf-list" id="turkce-list">
+                    <!-- PDF'ler JavaScript ile eklenecek -->
+                </ul>
+            </div>
+
+            <!-- Biyoloji Kartı -->
+            <div class="subject-card">
+                <h2>
+                    <span class="subject-icon">B</span>
+                    Biyoloji Ödevleri
+                </h2>
+                <ul class="pdf-list" id="biyoloji-list">
+                    <!-- PDF'ler JavaScript ile eklenecek -->
+                </ul>
+            </div>
+
+            <!-- Kavram Haritası Kartı -->
+            <div class="subject-card">
+                <h2>
+                    <span class="subject-icon">K</span>
+                    Kavram Haritası
+                </h2>
+                <ul class="pdf-list" id="kavram-list">
+                    <!-- PDF'ler JavaScript ile eklenecek -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tümünü Yazdır Bölümü -->
+        <div class="print-all-section">
+            <h3>🖨️ Toplu İşlemler</h3>
+            <button class="btn btn-print-all" onclick="printAllPDFs()">
+                Tüm PDF'leri Yazdır
+            </button>
+        </div>
+    </div>
+
+    <!-- PDF Görüntüleyici Modal -->
+    <div id="pdfViewerModal" class="pdf-viewer-modal">
+        <div class="pdf-viewer-content">
+            <span class="close-viewer" onclick="closeViewer()">&times;</span>
+            <iframe id="pdfFrame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // PDF dosyaları listesi
+        const pdfFiles = {
+            turkce: [
+                { name: 'Sözcükte Anlam 1', file: 'Turkce/Sözcükte Anlam 1.pdf' },
+                { name: 'Sözcükte Anlam 2', file: 'Turkce/Sözcükte Anlam 2.pdf' },
+                { name: 'Sözcükte Anlam 3', file: 'Turkce/Sözcükte Anlam 3.pdf' },
+                { name: 'Sözcükte Anlam 4', file: 'Turkce/Sözcükte Anlam 4.pdf' }
+            ],
+            biyoloji: [
+                { name: 'Sindirim 1', file: 'Biyoloji/Sindirim 1.pdf' },
+                { name: 'Sindirim 2', file: 'Biyoloji/Sindirim 2.pdf' },
+                { name: 'Sindirim 3', file: 'Biyoloji/Sindirim 3.pdf' },
+                { name: 'Sindirim 4', file: 'Biyoloji/Sindirim 4.pdf' },
+                { name: 'Sindirim 5', file: 'Biyoloji/Sindirim 5.pdf' }
+            ],
+            kavram: [
+                { name: 'Kavram Haritası', file: 'Kavram Haritası/Kavram Haritası.pdf' }
+            ]
+        };
+
+        // PDF listelerini oluştur
+        function createPDFList(subject, containerId) {
+            const container = document.getElementById(containerId);
+            const files = pdfFiles[subject];
+            
+            files.forEach(pdf => {
+                const li = document.createElement('li');
+                li.className = 'pdf-item';
+                li.innerHTML = `
+                    <span class="pdf-name">📄 ${pdf.name}</span>
+                    <div class="pdf-actions">
+                        <button class="btn btn-view" onclick="viewPDF('${pdf.file}')">
+                            👁️ Görüntüle
+                        </button>
+                        <button class="btn btn-print" onclick="printPDF('${pdf.file}')">
+                            🖨️ Yazdır
+                        </button>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // PDF görüntüle
+        function viewPDF(file) {
+            const modal = document.getElementById('pdfViewerModal');
+            const frame = document.getElementById('pdfFrame');
+            frame.src = file;
+            modal.style.display = 'block';
+        }
+
+        // Modal'ı kapat
+        function closeViewer() {
+            const modal = document.getElementById('pdfViewerModal');
+            const frame = document.getElementById('pdfFrame');
+            modal.style.display = 'none';
+            frame.src = '';
+        }
+
+        // PDF yazdır
+        function printPDF(file) {
+            const printWindow = window.open(file, '_blank');
+            printWindow.addEventListener('load', function() {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
+            });
+        }
+
+        // Tüm PDF'leri yazdır
+        function printAllPDFs() {
+            if (confirm('Tüm PDF dosyalarını yazdırmak istediğinizden emin misiniz?')) {
+                const allPDFs = [...pdfFiles.turkce, ...pdfFiles.biyoloji, ...pdfFiles.kavram];
+                let delay = 0;
+                
+                allPDFs.forEach((pdf, index) => {
+                    setTimeout(() => {
+                        printPDF(pdf.file);
+                    }, delay);
+                    delay += 2000; // Her PDF arasında 2 saniye bekle
+                });
+                
+                alert(`${allPDFs.length} adet PDF yazdırma kuyruğuna eklendi. Lütfen tarayıcı pop-up'larına izin verin.`);
+            }
+        }
+
+        // Modal dışına tıklandığında kapat
+        window.onclick = function(event) {
+            const modal = document.getElementById('pdfViewerModal');
+            if (event.target === modal) {
+                closeViewer();
+            }
+        }
+
+        // Sayfa yüklendiğinde PDF listelerini oluştur
+        document.addEventListener('DOMContentLoaded', function() {
+            createPDFList('turkce', 'turkce-list');
+            createPDFList('biyoloji', 'biyoloji-list');
+            createPDFList('kavram', 'kavram-list');
+        });
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeViewer();
+            }
+        });
+    </script>
+</body>
+</html>
