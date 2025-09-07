@@ -170,6 +170,26 @@
             box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
         }
 
+        .card-print-all {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+        }
+
+        .btn-print-subject {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .btn-print-subject:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
         .pdf-viewer-modal {
             display: none;
             position: fixed;
@@ -291,6 +311,11 @@
                 <ul class="pdf-list" id="turkce-list">
                     <!-- PDF'ler JavaScript ile eklenecek -->
                 </ul>
+                <div class="card-print-all">
+                    <button class="btn btn-print-subject" onclick="printSubjectPDFs('turkce')">
+                        🖨️ Tüm Türkçe PDF'lerini Yazdır
+                    </button>
+                </div>
             </div>
 
             <!-- Biyoloji Kartı -->
@@ -302,6 +327,11 @@
                 <ul class="pdf-list" id="biyoloji-list">
                     <!-- PDF'ler JavaScript ile eklenecek -->
                 </ul>
+                <div class="card-print-all">
+                    <button class="btn btn-print-subject" onclick="printSubjectPDFs('biyoloji')">
+                        🖨️ Tüm Biyoloji PDF'lerini Yazdır
+                    </button>
+                </div>
             </div>
 
             <!-- Kavram Haritası Kartı -->
@@ -401,6 +431,31 @@
                     printWindow.print();
                 }, 500);
             });
+        }
+
+        // Belirli bir konunun tüm PDF'lerini yazdır
+        function printSubjectPDFs(subject) {
+            const subjectNames = {
+                'turkce': 'Türkçe',
+                'biyoloji': 'Biyoloji',
+                'kavram': 'Kavram Haritası'
+            };
+            
+            const pdfs = pdfFiles[subject];
+            if (!pdfs || pdfs.length === 0) return;
+            
+            if (confirm(`${subjectNames[subject]} dersinin tüm PDF'lerini (${pdfs.length} adet) yazdırmak istediğinizden emin misiniz?`)) {
+                let delay = 0;
+                
+                pdfs.forEach((pdf, index) => {
+                    setTimeout(() => {
+                        printPDF(pdf.file);
+                    }, delay);
+                    delay += 2000; // Her PDF arasında 2 saniye bekle
+                });
+                
+                alert(`${pdfs.length} adet ${subjectNames[subject]} PDF'i yazdırma kuyruğuna eklendi.`);
+            }
         }
 
         // Tüm PDF'leri yazdır
