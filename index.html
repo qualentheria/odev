@@ -298,26 +298,10 @@
     <div class="container">
         <div class="header">
             <h1>📚 Ödev PDF Yazdırma Sistemi</h1>
-            <p>Türkçe, Biyoloji ve Kavram Haritası ödevlerinizi kolayca görüntüleyin ve yazdırın</p>
+            <p>Biyoloji ve Kavram Haritası ödevlerinizi kolayca görüntüleyin ve yazdırın</p>
         </div>
 
         <div class="subjects-grid">
-            <!-- Türkçe Kartı -->
-            <div class="subject-card">
-                <h2>
-                    <span class="subject-icon">T</span>
-                    Türkçe Ödevleri
-                </h2>
-                <ul class="pdf-list" id="turkce-list">
-                    <!-- PDF'ler JavaScript ile eklenecek -->
-                </ul>
-                <div class="card-print-all">
-                    <button class="btn btn-print-subject" onclick="printSubjectPDFs('turkce')">
-                        🖨️ Tüm Türkçe PDF'lerini Yazdır
-                    </button>
-                </div>
-            </div>
-
             <!-- Biyoloji Kartı -->
             <div class="subject-card">
                 <h2>
@@ -366,12 +350,6 @@
     <script>
         // PDF dosyaları listesi
         const pdfFiles = {
-            turkce: [
-                { name: 'Sözcükte Anlam 1', file: 'Turkce/Sözcükte Anlam 1.pdf' },
-                { name: 'Sözcükte Anlam 2', file: 'Turkce/Sözcükte Anlam 2.pdf' },
-                { name: 'Sözcükte Anlam 3', file: 'Turkce/Sözcükte Anlam 3.pdf' },
-                { name: 'Sözcükte Anlam 4', file: 'Turkce/Sözcükte Anlam 4.pdf' }
-            ],
             biyoloji: [
                 { name: 'Sindirim 1', file: 'Biyoloji/Sindirim 1.pdf' },
                 { name: 'Sindirim 2', file: 'Biyoloji/Sindirim 2.pdf' },
@@ -436,7 +414,6 @@
         // Belirli bir konunun tüm PDF'lerini yazdır
         function printSubjectPDFs(subject) {
             const subjectNames = {
-                'turkce': 'Türkçe',
                 'biyoloji': 'Biyoloji',
                 'kavram': 'Kavram Haritası'
             };
@@ -461,7 +438,7 @@
         // Tüm PDF'leri yazdır
         function printAllPDFs() {
             if (confirm('Tüm PDF dosyalarını yazdırmak istediğinizden emin misiniz?')) {
-                const allPDFs = [...pdfFiles.turkce, ...pdfFiles.biyoloji, ...pdfFiles.kavram];
+                const allPDFs = [...pdfFiles.biyoloji, ...pdfFiles.kavram];
                 let delay = 0;
                 
                 allPDFs.forEach((pdf, index) => {
@@ -485,7 +462,6 @@
 
         // Sayfa yüklendiğinde PDF listelerini oluştur
         document.addEventListener('DOMContentLoaded', function() {
-            createPDFList('turkce', 'turkce-list');
             createPDFList('biyoloji', 'biyoloji-list');
             createPDFList('kavram', 'kavram-list');
         });
